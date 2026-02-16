@@ -1,8 +1,164 @@
-/*
+.mermaid-zoom-button {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	background: rgba(255, 255, 255, 0.8);
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 4px;
+	font-size: 12px;
+	cursor: pointer;
+	z-index: 10;
+	transition: all 0.2s ease;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.mermaid-zoom-button:hover {
+	background: rgba(255, 255, 255, 1);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
 
-If your plugin does not need CSS, delete this file.
+.mermaid-zoom-modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.8);
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 
-*/
+.mermaid-zoom-content {
+	position: relative;
+	max-width: 95%;
+	max-height: 95%;
+	overflow: hidden;
+	background: white;
+	border-radius: 8px;
+	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+	display: flex;
+	flex-direction: column;
+}
+
+.mermaid-zoom-taskbar {
+	position: relative;
+	width: 100%;
+	height: 40px;
+	background: rgba(240, 240, 240, 0.9);
+	border-bottom: 1px solid #ddd;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding: 0 10px;
+	box-sizing: border-box;
+}
+
+.mermaid-zoom-svg-container {
+	position: relative;
+	transform-origin: center center;
+	cursor: grab;
+	flex: 1;
+	overflow: auto;
+}
+
+.mermaid-zoom-svg-container:active {
+	cursor: grabbing;
+}
+
+.mermaid-zoom-svg-container svg {
+	max-width: none !important;
+	max-height: none !important;
+}
+
+.mermaid-zoom-controls {
+	position: absolute;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	background: rgba(255, 255, 255, 0.9);
+	border-radius: 20px;
+	padding: 8px 16px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.mermaid-zoom-control-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 16px;
+	padding: 4px 8px;
+	border-radius: 4px;
+	transition: background 0.2s ease;
+}
+
+.mermaid-zoom-control-btn:hover {
+	background: rgba(0, 0, 0, 0.1);
+}
+
+.mermaid-zoom-close-btn {
+	background: rgba(255, 255, 255, 0.9);
+	border: none;
+	border-radius: 4px;
+	width: 30px;
+	height: 30px;
+	cursor: pointer;
+	font-size: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+.mermaid-zoom-close-btn:hover {
+	background: rgba(255, 255, 255, 1);
+}
+
+.mermaid-zoom-zoom-level {
+	font-size: 14px;
+	min-width: 60px;
+	text-align: center;
+}
+
+.mermaid-container {
+	position: relative;
+}
+
+/* Ensure compatibility with different Obsidian themes */
+.theme-dark .mermaid-zoom-button {
+	background: rgba(40, 40, 40, 0.8);
+	border-color: #555;
+	color: #eee;
+}
+
+.theme-dark .mermaid-zoom-button:hover {
+	background: rgba(40, 40, 40, 1);
+}
+
+.theme-dark .mermaid-zoom-content {
+	background: #2d2d2d;
+}
+
+.theme-dark .mermaid-zoom-taskbar {
+	background: rgba(40, 40, 40, 0.9);
+	border-bottom: 1px solid #555;
+}
+
+.theme-dark .mermaid-zoom-controls {
+	background: rgba(40, 40, 40, 0.9);
+	color: #eee;
+}
+
+.theme-dark .mermaid-zoom-control-btn:hover {
+	background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark .mermaid-zoom-close-btn {
+	background: rgba(60, 60, 60, 0.9);
+	color: #eee;
+}

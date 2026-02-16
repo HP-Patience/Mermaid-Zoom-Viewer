@@ -1,7 +1,7 @@
 {
-	"name": "obsidian-sample-plugin",
+	"name": "mermaid-zoom-viewer",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "Enhances Mermaid diagrams with zoom and pan functionality, allowing full-screen viewing of SVG content.",
 	"main": "main.js",
 	"type": "module",
 	"scripts": {
@@ -10,7 +10,7 @@
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"lint": "eslint ."
 	},
-	"keywords": [],
+	"keywords": ["obsidian-plugin", "mermaid", "diagram", "zoom", "viewer"],
 	"license": "0-BSD",
 	"devDependencies": {
 		"@types/node": "^16.11.6",

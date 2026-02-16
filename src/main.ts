@@ -1,76 +1,46 @@
 import {App, Editor, MarkdownView, Modal, Notice, Plugin} from 'obsidian';
 import {DEFAULT_SETTINGS, MyPluginSettings, SampleSettingTab} from "./settings";
 
-// Remember to rename these classes and interfaces!
+// Type definitions
+interface TouchEventWithTouches extends TouchEvent {
+	touches: TouchList;
+}
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
-
+	
 	async onload() {
 		await this.loadSettings();
-
-		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('dice', 'Sample', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status bar text');
-
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-modal-simple',
-			name: 'Open modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'replace-selected',
-			name: 'Replace selected content',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				editor.replaceSelection('Sample editor command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-modal-complex',
-			name: 'Open modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-				return false;
-			}
-		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SampleSettingTab(this.app, this));
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			new Notice("Click");
+		// Add command to manually process Mermaid diagrams
+		this.addCommand({
+			id: 'mermaid-zoom-viewer-process-diagrams',
+			name: '处理 Mermaid 图表',
+			callback: () => {
+				this.processMermaidDiagrams();
+			}
 		});
 
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
+		// Register event listeners for when the active view changes or the content is modified
+		this.registerEvent(this.app.workspace.on('active-leaf-change', () => {
+			this.processMermaidDiagrams();
+		}));
 
+		// Register event listeners for when the view mode changes
+		this.registerEvent(this.app.workspace.on('layout-change', () => {
+			this.processMermaidDiagrams();
+		}));
+
+		// Initial processing of Mermaid diagrams
+		this.processMermaidDiagrams();
 	}
 
 	onunload() {
+		// Clean up any remaining zoom buttons
+		this.cleanUpZoomButtons();
 	}
 
 	async loadSettings() {
@@ -80,20 +50,368 @@ export default class MyPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
+	// Clean up any remaining zoom buttons
+	cleanUpZoomButtons() {
+		const zoomButtons = document.querySelectorAll('.mermaid-zoom-button');
+		zoomButtons.forEach(button => button.remove());
+	}
+
+	// Process all Mermaid diagrams in the current view
+	processMermaidDiagrams() {
+		// Clean up existing zoom buttons first
+		this.cleanUpZoomButtons();
+
+		// Get all Mermaid diagram containers
+		const mermaidContainers = document.querySelectorAll('.mermaid');
+		
+		mermaidContainers.forEach(container => {
+			// Skip if it's already been processed
+			if (container.querySelector('.mermaid-zoom-button')) {
+				return;
+			}
+
+			// Check if we should show the zoom button
+			if (!this.shouldShowZoomButton(container)) {
+				return;
+			}
+
+			// Create a relative container if not already present
+			let relativeContainer = container;
+			if ((container as HTMLElement).style.position !== 'relative') {
+				relativeContainer = document.createElement('div');
+				relativeContainer.className = 'mermaid-container';
+				container.parentNode?.insertBefore(relativeContainer, container);
+				relativeContainer.appendChild(container);
+			}
+
+			// Create zoom button
+			const zoomButton = document.createElement('button');
+			zoomButton.className = 'mermaid-zoom-button';
+			zoomButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+			zoomButton.title = '放大查看';
+
+			// Add click event listener to the zoom button
+			zoomButton.addEventListener('click', (e) => {
+				e.stopPropagation();
+				this.openZoomModal(container);
+			});
+
+			// Add the zoom button to the container
+			relativeContainer.appendChild(zoomButton);
+		});
+	}
+
+	// Check if we should show the zoom button for a given container
+	shouldShowZoomButton(container: Element): boolean {
+		// Always show if the setting is enabled
+		if (this.settings.showZoomButtonAlways) {
+			return true;
+		}
+
+		return false;
+	}
+
+	// Open the zoom modal with the Mermaid diagram
+	openZoomModal(container: Element) {
+		// Get the SVG content from the container
+		const svgElement = container.querySelector('svg');
+		if (!svgElement) {
+			new Notice('No SVG found in the Mermaid diagram');
+			return;
+		}
+
+		// Clone the SVG to avoid modifying the original
+		const svgClone = svgElement.cloneNode(true) as SVGElement;
+
+		// Open the modal with the SVG
+		new MermaidZoomModal(this.app, svgClone, this.settings).open();
+	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
+class MermaidZoomModal extends Modal {
+	private svgElement: SVGElement;
+	private settings: MyPluginSettings;
+	private zoomLevel: number;
+	private isDragging: boolean;
+	private startX: number;
+	private startY: number;
+	private translateX: number;
+	private translateY: number;
+
+	constructor(app: App, svgElement: SVGElement, settings: MyPluginSettings) {
 		super(app);
+		this.svgElement = svgElement;
+		this.settings = settings;
+		this.zoomLevel = settings.defaultZoomLevel;
+		this.isDragging = false;
+		this.startX = 0;
+		this.startY = 0;
+		this.translateX = 0;
+		this.translateY = 0;
 	}
 
 	onOpen() {
-		let {contentEl} = this;
-		contentEl.setText('Woah!');
+		const {contentEl} = this;
+		contentEl.className = 'mermaid-zoom-modal';
+
+		// Create the content container
+		const contentContainer = contentEl.createEl('div');
+		contentContainer.className = 'mermaid-zoom-content';
+		contentContainer.style.width = `${this.settings.modalWidth}%`;
+		contentContainer.style.height = `${this.settings.modalHeight}%`;
+
+		// Create the taskbar
+		const taskbar = contentContainer.createEl('div');
+		taskbar.className = 'mermaid-zoom-taskbar';
+
+		// Create the close button and add it to the taskbar
+		const closeButton = taskbar.createEl('button');
+		closeButton.className = 'mermaid-zoom-close-btn';
+		closeButton.textContent = '×';
+		closeButton.addEventListener('click', (e) => {
+			e.stopPropagation();
+			this.close();
+		});
+		closeButton.addEventListener('mousedown', (e) => {
+			e.stopPropagation();
+		});
+
+		// Create the SVG container
+		const svgContainer = contentContainer.createEl('div');
+		svgContainer.className = 'mermaid-zoom-svg-container';
+
+		// Add the SVG to the container
+		svgContainer.appendChild(this.svgElement);
+
+		// Create the controls container
+		const controlsContainer = contentContainer.createEl('div');
+		controlsContainer.className = 'mermaid-zoom-controls';
+
+		// Create the zoom in button
+		const zoomInButton = controlsContainer.createEl('button');
+		zoomInButton.className = 'mermaid-zoom-control-btn';
+		zoomInButton.textContent = '+';
+		zoomInButton.addEventListener('click', () => this.zoomIn());
+
+		// Create the zoom level display
+		const zoomLevelDisplay = controlsContainer.createEl('span');
+		zoomLevelDisplay.className = 'mermaid-zoom-zoom-level';
+		zoomLevelDisplay.textContent = `${Math.round(this.zoomLevel * 100)}%`;
+
+		// Create the zoom out button
+		const zoomOutButton = controlsContainer.createEl('button');
+		zoomOutButton.className = 'mermaid-zoom-control-btn';
+		zoomOutButton.textContent = '-';
+		zoomOutButton.addEventListener('click', () => this.zoomOut());
+
+		// Create the reset button
+		const resetButton = controlsContainer.createEl('button');
+		resetButton.className = 'mermaid-zoom-control-btn';
+		resetButton.textContent = 'Reset';
+		resetButton.addEventListener('click', () => this.resetZoom());
+
+		// Create the export button if enabled
+		if (this.settings.enableExportPNG) {
+			const exportButton = controlsContainer.createEl('button');
+			exportButton.className = 'mermaid-zoom-control-btn';
+			exportButton.textContent = 'Export PNG';
+			exportButton.addEventListener('click', () => this.exportPNG());
+		}
+
+		// Add event listeners for zooming and panning
+		svgContainer.addEventListener('wheel', (e) => {
+			e.preventDefault();
+			const delta = e.deltaY > 0 ? -0.1 : 0.1;
+			this.updateZoom(this.zoomLevel + delta, e.clientX, e.clientY);
+		});
+
+		svgContainer.addEventListener('mousedown', (e) => {
+			this.isDragging = true;
+			this.startX = e.clientX - this.translateX;
+			this.startY = e.clientY - this.translateY;
+		});
+
+		contentEl.addEventListener('mousemove', (e) => {
+			if (this.isDragging) {
+				this.translateX = e.clientX - this.startX;
+				this.translateY = e.clientY - this.startY;
+				this.updateTransform();
+			}
+		});
+
+		contentEl.addEventListener('mouseup', () => {
+			this.isDragging = false;
+		});
+
+		contentEl.addEventListener('mouseleave', () => {
+			this.isDragging = false;
+		});
+
+		// Add event listener for keyboard events
+		contentEl.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				this.close();
+			}
+		});
+
+		// Add event listener for touch events (mobile support)
+		svgContainer.addEventListener('touchstart', (e: TouchEvent) => {
+			if (e.touches && e.touches.length === 1) {
+				this.isDragging = true;
+				const touch = e.touches[0];
+				if (touch) {
+					this.startX = touch.clientX - this.translateX;
+					this.startY = touch.clientY - this.translateY;
+				}
+			}
+		});
+
+		contentEl.addEventListener('touchmove', (e: TouchEvent) => {
+			if (this.isDragging && e.touches && e.touches.length === 1) {
+				const touch = e.touches[0];
+				if (touch) {
+					this.translateX = touch.clientX - this.startX;
+					this.translateY = touch.clientY - this.startY;
+					this.updateTransform();
+				}
+			}
+		});
+
+		contentEl.addEventListener('touchend', () => {
+			this.isDragging = false;
+		});
+
+		// Initial transform and center image
+		this.updateTransform();
+		this.centerImage();
 	}
 
 	onClose() {
 		const {contentEl} = this;
 		contentEl.empty();
+	}
+
+	// Zoom in
+	private zoomIn() {
+		this.updateZoom(this.zoomLevel + 0.1);
+	}
+
+	// Zoom out
+	private zoomOut() {
+		this.updateZoom(this.zoomLevel - 0.1);
+	}
+
+	// Reset zoom
+	private resetZoom() {
+		this.zoomLevel = this.settings.defaultZoomLevel;
+		this.translateX = 0;
+		this.translateY = 0;
+		this.updateTransform();
+		this.updateZoomLevelDisplay();
+	}
+
+	// Update zoom level
+	private updateZoom(newZoomLevel: number, clientX?: number, clientY?: number) {
+		// Clamp zoom level to min/max values
+		this.zoomLevel = Math.max(this.settings.minZoomLevel, Math.min(this.settings.maxZoomLevel, newZoomLevel));
+		this.updateTransform();
+		this.updateZoomLevelDisplay();
+	}
+
+	// Update transform
+	private updateTransform() {
+		const svgContainer = this.contentEl.querySelector('.mermaid-zoom-svg-container');
+		if (svgContainer) {
+			(svgContainer as HTMLElement).style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.zoomLevel})`;
+		}
+	}
+
+	// Center the image
+	private centerImage() {
+		const svgContainer = this.contentEl.querySelector('.mermaid-zoom-svg-container');
+		if (svgContainer) {
+			// Reset transform
+			this.zoomLevel = this.settings.defaultZoomLevel;
+			
+			// Calculate center position
+			const containerRect = svgContainer.getBoundingClientRect();
+			const svgRect = this.svgElement.getBoundingClientRect();
+			
+			// Check if the SVG is wider than the container
+			if (svgRect.width * this.zoomLevel > containerRect.width) {
+				// Adjust zoom level to fit the SVG width
+				this.zoomLevel = containerRect.width / svgRect.width * 0.95; // Add 5% padding
+			}
+			
+			// Check if the SVG is taller than the container
+			if (svgRect.height * this.zoomLevel > containerRect.height) {
+				// Adjust zoom level to fit the SVG height
+				const heightZoomLevel = containerRect.height / svgRect.height * 0.95; // Add 5% padding
+				if (heightZoomLevel < this.zoomLevel) {
+					this.zoomLevel = heightZoomLevel;
+				}
+			}
+			
+			// Calculate center position with the adjusted zoom level
+			this.translateX = (containerRect.width - svgRect.width * this.zoomLevel) / 2;
+			this.translateY = (containerRect.height - svgRect.height * this.zoomLevel) / 2;
+			
+			// Apply transform
+			this.updateTransform();
+			this.updateZoomLevelDisplay();
+		}
+	}
+
+	// Update zoom level display
+	private updateZoomLevelDisplay() {
+		const zoomLevelDisplay = this.contentEl.querySelector('.mermaid-zoom-zoom-level');
+		if (zoomLevelDisplay) {
+			zoomLevelDisplay.textContent = `${Math.round(this.zoomLevel * 100)}%`;
+		}
+	}
+
+	// Export as PNG
+	private exportPNG() {
+		const svgContainer = this.contentEl.querySelector('.mermaid-zoom-svg-container');
+		if (!svgContainer) return;
+
+		// Create a canvas element
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return;
+
+		// Get the SVG dimensions
+		const svgWidth = this.svgElement.clientWidth;
+		const svgHeight = this.svgElement.clientHeight;
+
+		// Set canvas dimensions
+		canvas.width = svgWidth;
+		canvas.height = svgHeight;
+
+		// Convert SVG to data URL
+		const svgData = new XMLSerializer().serializeToString(this.svgElement);
+		const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+		const url = URL.createObjectURL(svgBlob);
+
+		// Create an image element
+		const img = new Image();
+		img.onload = () => {
+			// Draw the image to the canvas
+			ctx.drawImage(img, 0, 0);
+
+			// Convert canvas to PNG data URL
+			const pngUrl = canvas.toDataURL('image/png');
+
+			// Create a download link
+			const link = document.createElement('a');
+			link.href = pngUrl;
+			link.download = `mermaid-diagram-${Date.now()}.png`;
+			link.click();
+
+			// Clean up
+			URL.revokeObjectURL(url);
+		};
+		img.src = url;
 	}
 }

@@ -1,90 +1,102 @@
-# Obsidian Sample Plugin
+# Mermaid Zoom Viewer
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+A plugin for Obsidian that enhances Mermaid diagrams with zoom and pan functionality, allowing full-screen viewing of SVG content.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Features
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+- **Automatic Detection**: Automatically identifies Mermaid diagrams in your notes, including Gantt charts, flowcharts, and more.
+- **Zoom Button**: Adds a "放大查看" (Zoom View) button to the top-right corner of each Mermaid diagram.
+- **Full-Screen Modal**: Clicking the button opens the diagram in a full-screen modal window.
+- **Interactive Controls**: Supports:
+  - Mouse wheel zoom
+  - Drag and drop pan
+  - Zoom in/out buttons
+  - Reset zoom button
+  - Zoom level display
+- **Mobile Support**: Touch events for zoom and pan on mobile devices.
+- **PNG Export**: Option to export diagrams as PNG images.
+- **Customizable Settings**: Control when to show the zoom button, default zoom level, and more.
+- **Theme Compatible**: Works with both light and dark themes in Obsidian.
 
-## First time developing plugins?
+## Installation
 
-Quick starting guide for new plugin devs:
+### From Community Plugins
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+1. Open Obsidian settings
+2. Go to "Community Plugins"
+3. Click "Browse"
+4. Search for "Mermaid Zoom Viewer"
+5. Click "Install"
+6. Click "Enable"
 
-## Releasing new releases
+### Manual Installation
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+1. Download the latest release from the [GitHub repository](https://github.com/yourusername/mermaid-zoom-viewer/releases)
+2. Extract the zip file
+3. Copy the extracted folder to your vault's `.obsidian/plugins/` directory
+4. Enable the plugin in Obsidian settings
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## Usage
 
-## Adding your plugin to the community plugin list
+1. Create or open a note with Mermaid diagrams
+2. In reading mode or live preview, you'll see a "放大查看" button in the top-right corner of each diagram
+3. Click the button to open the diagram in full-screen mode
+4. Use the mouse wheel to zoom in and out
+5. Click and drag to pan the diagram
+6. Use the control buttons at the bottom to zoom in/out, reset zoom, or export as PNG
+7. Press ESC or click the close button to exit full-screen mode
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+## Settings
 
-## How to use
+The plugin includes a settings tab where you can configure:
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+- **Always show zoom button**: Show the zoom button on all Mermaid diagrams
+- **Show zoom button on overflow**: Only show the zoom button when the diagram width overflows
+- **Default zoom level**: Initial zoom level when opening diagrams
+- **Minimum zoom level**: Minimum allowed zoom level
+- **Maximum zoom level**: Maximum allowed zoom level
+- **Enable PNG export**: Allow exporting diagrams as PNG images
 
-## Manually installing the plugin
+## Compatibility
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+- **Reading Mode**: ✅ Fully supported
+- **Live Preview Mode**: ✅ Fully supported
+- **Source Mode**: ✅ No interference
+- **Mobile Apps**: ✅ Supported with touch events
 
-## Improve code quality with eslint
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
+## Development
 
-## Funding URL
+### Prerequisites
 
-You can include funding URLs where people who use your plugin can financially support it.
+- Node.js v16 or higher
+- npm or yarn
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+### Setup
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
-```
+1. Clone this repository
+2. Navigate to the project directory
+3. Run `npm install` to install dependencies
+4. Run `npm run dev` to start development mode
+5. Copy the project folder to your vault's `.obsidian/plugins/` directory
+6. Reload Obsidian to load the plugin
 
-If you have multiple URLs, you can also do:
+### Building for Release
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+1. Run `npm run build` to create a production build
+2. The built files will be in the project root directory
 
-## API Documentation
+## Contributing
 
-See https://docs.obsidian.md
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This plugin is licensed under the 0-BSD License.
+
+## Support
+
+If you have any issues or feature requests, please open an issue on the [GitHub repository](https://github.com/yourusername/mermaid-zoom-viewer/issues).
+
+---
+
+Made with ❤️ for Obsidian users everywhere!

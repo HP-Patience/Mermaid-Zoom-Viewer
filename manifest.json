@@ -1,10 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "mermaid-zoom-viewer",
+	"name": "Mermaid Zoom Viewer",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
+	"description": "Enhances Mermaid diagrams with zoom and pan functionality, allowing full-screen viewing of SVG content.",
+	"author": "Celyn",
 	"authorUrl": "https://obsidian.md",
 	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false
