@@ -1,23 +1,18 @@
-import {App, Editor, MarkdownView, Modal, Notice, Plugin} from 'obsidian';
-import {DEFAULT_SETTINGS, MyPluginSettings, SampleSettingTab} from "./settings";
+import {App, Modal, Notice, Plugin} from 'obsidian';
+import {DEFAULT_SETTINGS, MermaidZoomViewerSettings, MermaidZoomViewerSettingTab} from "./settings";
 
-// Type definitions
-interface TouchEventWithTouches extends TouchEvent {
-	touches: TouchList;
-}
-
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class MermaidZoomViewerPlugin extends Plugin {
+	settings: MermaidZoomViewerSettings;
 	
 	async onload() {
 		await this.loadSettings();
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new MermaidZoomViewerSettingTab(this.app, this));
 
 		// Add command to manually process Mermaid diagrams
 		this.addCommand({
-			id: 'mermaid-zoom-viewer-process-diagrams',
+			id: 'process-diagrams',
 			name: '处理 Mermaid 图表',
 			callback: () => {
 				this.processMermaidDiagrams();
@@ -44,7 +39,7 @@ export default class MyPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<MyPluginSettings>);
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<MermaidZoomViewerSettings>);
 	}
 
 	async saveSettings() {
@@ -88,7 +83,35 @@ export default class MyPlugin extends Plugin {
 			// Create zoom button
 			const zoomButton = document.createElement('button');
 			zoomButton.className = 'mermaid-zoom-button';
-			zoomButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+			
+			// Create svg element
+			const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+			svg.setAttribute('width', '16');
+			svg.setAttribute('height', '16');
+			svg.setAttribute('viewBox', '0 0 24 24');
+			svg.setAttribute('fill', 'none');
+			svg.setAttribute('stroke', 'currentColor');
+			svg.setAttribute('stroke-width', '2');
+			svg.setAttribute('stroke-linecap', 'round');
+			svg.setAttribute('stroke-linejoin', 'round');
+			
+			// Create circle element
+			const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+			circle.setAttribute('cx', '11');
+			circle.setAttribute('cy', '11');
+			circle.setAttribute('r', '8');
+			svg.appendChild(circle);
+			
+			// Create line element
+			const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+			line.setAttribute('x1', '21');
+			line.setAttribute('y1', '21');
+			line.setAttribute('x2', '16.65');
+			line.setAttribute('y2', '16.65');
+			svg.appendChild(line);
+			
+			// Add svg to button
+			zoomButton.appendChild(svg);
 			zoomButton.title = '放大查看';
 
 			// Add click event listener to the zoom button
@@ -131,7 +154,7 @@ export default class MyPlugin extends Plugin {
 
 class MermaidZoomModal extends Modal {
 	private svgElement: SVGElement;
-	private settings: MyPluginSettings;
+	private settings: MermaidZoomViewerSettings;
 	private zoomLevel: number;
 	private isDragging: boolean;
 	private startX: number;
@@ -139,7 +162,7 @@ class MermaidZoomModal extends Modal {
 	private translateX: number;
 	private translateY: number;
 
-	constructor(app: App, svgElement: SVGElement, settings: MyPluginSettings) {
+	constructor(app: App, svgElement: SVGElement, settings: MermaidZoomViewerSettings) {
 		super(app);
 		this.svgElement = svgElement;
 		this.settings = settings;

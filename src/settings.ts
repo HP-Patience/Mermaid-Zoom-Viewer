@@ -1,7 +1,7 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "./main";
+import MermaidZoomViewerPlugin from "./main";
 
-export interface MyPluginSettings {
+export interface MermaidZoomViewerSettings {
 	showZoomButtonAlways: boolean;
 	defaultZoomLevel: number;
 	minZoomLevel: number;
@@ -11,7 +11,7 @@ export interface MyPluginSettings {
 	modalHeight: number;
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+export const DEFAULT_SETTINGS: MermaidZoomViewerSettings = {
 	showZoomButtonAlways: true,
 	defaultZoomLevel: 1,
 	minZoomLevel: 0.1,
@@ -21,10 +21,10 @@ export const DEFAULT_SETTINGS: MyPluginSettings = {
 	modalHeight: 90
 }
 
-export class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+export class MermaidZoomViewerSettingTab extends PluginSettingTab {
+	plugin: MermaidZoomViewerPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: MermaidZoomViewerPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -34,7 +34,9 @@ export class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Mermaid 缩放查看器设置'});
+		new Setting(containerEl)
+			.setName('Mermaid 缩放查看器设置')
+			.setHeading();
 
 		// 重置设置按钮
 		new Setting(containerEl)
