@@ -335,6 +335,8 @@ class MermaidZoomModal extends Modal {
 		this.translateY = 0;
 		this.updateTransform();
 		this.updateZoomLevelDisplay();
+		// Recenter the image after resetting zoom
+		this.centerImage();
 	}
 
 	// Update zoom level
@@ -347,9 +349,10 @@ class MermaidZoomModal extends Modal {
 
 	// Update transform
 	private updateTransform() {
-		const svgContainer = this.contentEl.querySelector('.mermaid-zoom-svg-container');
-		if (svgContainer) {
-			(svgContainer as HTMLElement).style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.zoomLevel})`;
+		// Apply transform to the SVG element directly instead of the container
+		if (this.svgElement) {
+			this.svgElement.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.zoomLevel})`;
+			this.svgElement.style.transformOrigin = 'center center';
 		}
 	}
 
@@ -359,6 +362,8 @@ class MermaidZoomModal extends Modal {
 		if (svgContainer) {
 			// Reset transform
 			this.zoomLevel = this.settings.defaultZoomLevel;
+			this.translateX = 0;
+			this.translateY = 0;
 			
 			// Force reflow to ensure accurate dimensions
 			svgContainer.getBoundingClientRect();
