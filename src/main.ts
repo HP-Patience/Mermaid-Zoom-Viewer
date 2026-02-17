@@ -307,7 +307,10 @@ class MermaidZoomModal extends Modal {
 
 		// Initial transform and center image
 		this.updateTransform();
-		this.centerImage();
+		// Use requestAnimationFrame to ensure modal dimensions are fully rendered
+		requestAnimationFrame(() => {
+			this.centerImage();
+		});
 	}
 
 	onClose() {
@@ -359,26 +362,37 @@ class MermaidZoomModal extends Modal {
 			
 			// Calculate center position
 			const containerRect = svgContainer.getBoundingClientRect();
-			const svgRect = this.svgElement.getBoundingClientRect();
+			
+			// Get SVG original dimensions using getBBox()
+			let svgWidth, svgHeight;
+			try {
+				const bbox = this.svgElement.getBBox();
+				svgWidth = bbox.width;
+				svgHeight = bbox.height;
+			} catch (e) {
+				// Fallback to clientWidth/clientHeight if getBBox() fails
+				svgWidth = this.svgElement.clientWidth || 800;
+				svgHeight = this.svgElement.clientHeight || 600;
+			}
 			
 			// Check if the SVG is wider than the container
-			if (svgRect.width * this.zoomLevel > containerRect.width) {
+			if (svgWidth * this.zoomLevel > containerRect.width) {
 				// Adjust zoom level to fit the SVG width
-				this.zoomLevel = containerRect.width / svgRect.width * 0.95; // Add 5% padding
+				this.zoomLevel = containerRect.width / svgWidth * 0.95; // Add 5% padding
 			}
 			
 			// Check if the SVG is taller than the container
-			if (svgRect.height * this.zoomLevel > containerRect.height) {
+			if (svgHeight * this.zoomLevel > containerRect.height) {
 				// Adjust zoom level to fit the SVG height
-				const heightZoomLevel = containerRect.height / svgRect.height * 0.95; // Add 5% padding
+				const heightZoomLevel = containerRect.height / svgHeight * 0.95; // Add 5% padding
 				if (heightZoomLevel < this.zoomLevel) {
 					this.zoomLevel = heightZoomLevel;
 				}
 			}
 			
 			// Calculate center position with the adjusted zoom level
-			this.translateX = (containerRect.width - svgRect.width * this.zoomLevel) / 2;
-			this.translateY = (containerRect.height - svgRect.height * this.zoomLevel) / 2;
+			this.translateX = (containerRect.width - svgWidth * this.zoomLevel) / 2;
+			this.translateY = (containerRect.height - svgHeight * this.zoomLevel) / 2;
 			
 			// Apply transform
 			this.updateTransform();

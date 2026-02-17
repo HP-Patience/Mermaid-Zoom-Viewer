@@ -61,7 +61,7 @@
 	transform-origin: center center;
 	cursor: grab;
 	flex: 1;
-	overflow: auto;
+	overflow: hidden;
 }
 
 .mermaid-zoom-svg-container:active {
