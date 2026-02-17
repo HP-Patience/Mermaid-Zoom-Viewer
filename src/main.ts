@@ -400,9 +400,10 @@ class MermaidZoomModal extends Modal {
 			const heightRatio = containerRect.height / svgHeight * padding;
 			this.zoomLevel = Math.min(widthRatio, heightRatio);
 			
-			// Calculate center position with the adjusted zoom level
-			this.translateX = (containerRect.width - svgWidth * this.zoomLevel) / 2;
-			this.translateY = (containerRect.height - svgHeight * this.zoomLevel) / 2;
+			// Since we're using flexbox to center the SVG, we don't need to calculate translate values
+			// The SVG will be centered by CSS, and we just apply the scale transform
+			this.translateX = 0;
+			this.translateY = 0;
 			
 			// Apply transform
 			this.updateTransform();
