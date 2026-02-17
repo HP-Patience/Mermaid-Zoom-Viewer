@@ -85,7 +85,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This plugin is licensed under the 0-BSD License.
+This plugin is licensed under the MIT License.
 
 ## Support
 
