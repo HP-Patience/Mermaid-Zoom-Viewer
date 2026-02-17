@@ -9,6 +9,8 @@ export interface MermaidZoomViewerSettings {
 	enableExportPNG: boolean;
 	modalWidth: number;
 	modalHeight: number;
+	svgContainerWidth: number;
+	svgContainerHeight: number;
 }
 
 export const DEFAULT_SETTINGS: MermaidZoomViewerSettings = {
@@ -18,7 +20,9 @@ export const DEFAULT_SETTINGS: MermaidZoomViewerSettings = {
 	maxZoomLevel: 10,
 	enableExportPNG: true,
 	modalWidth: 90,
-	modalHeight: 90
+	modalHeight: 90,
+	svgContainerWidth: 80,
+	svgContainerHeight: 80
 }
 
 export class MermaidZoomViewerSettingTab extends PluginSettingTab {
@@ -132,6 +136,33 @@ export class MermaidZoomViewerSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.modalHeight)
 					.onChange(async (value) => {
 						this.plugin.settings.modalHeight = value;
+						await this.plugin.saveSettings();
+					});
+			});
+
+		// SVG容器大小设置
+		new Setting(containerEl)
+			.setName('SVG容器宽度')
+			.setDesc('SVG容器的宽度百分比')
+			.addSlider(slider => {
+				slider
+					.setLimits(50, 100, 5)
+					.setValue(this.plugin.settings.svgContainerWidth || 80)
+					.onChange(async (value) => {
+						this.plugin.settings.svgContainerWidth = value;
+						await this.plugin.saveSettings();
+					});
+			});
+
+		new Setting(containerEl)
+			.setName('SVG容器高度')
+			.setDesc('SVG容器的高度百分比')
+			.addSlider(slider => {
+				slider
+					.setLimits(50, 100, 5)
+					.setValue(this.plugin.settings.svgContainerHeight || 80)
+					.onChange(async (value) => {
+						this.plugin.settings.svgContainerHeight = value;
 						await this.plugin.saveSettings();
 					});
 			});

@@ -39,7 +39,11 @@ export default class MermaidZoomViewerPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData() as Partial<MermaidZoomViewerSettings>);
+		const data = await this.loadData() as Partial<MermaidZoomViewerSettings>;
+		this.settings = {
+			...DEFAULT_SETTINGS,
+			...data
+		};
 	}
 
 	async saveSettings() {
@@ -203,6 +207,9 @@ class MermaidZoomModal extends Modal {
 		// Create the SVG container
 		const svgContainer = contentContainer.createEl('div');
 		svgContainer.className = 'mermaid-zoom-svg-container';
+		// Set SVG container size based on settings
+		svgContainer.style.width = `${this.settings.svgContainerWidth}%`;
+		svgContainer.style.height = `${this.settings.svgContainerHeight}%`;
 
 		// Add the SVG to the container
 		svgContainer.appendChild(this.svgElement);
@@ -352,7 +359,8 @@ class MermaidZoomModal extends Modal {
 		// Apply transform to the SVG element directly instead of the container
 		if (this.svgElement) {
 			this.svgElement.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.zoomLevel})`;
-			this.svgElement.style.transformOrigin = 'center center';
+			// Use CSS class for transform origin
+			this.svgElement.classList.add('mermaid-zoom-transform-origin');
 		}
 	}
 
@@ -372,22 +380,21 @@ class MermaidZoomModal extends Modal {
 			const containerRect = svgContainer.getBoundingClientRect();
 			
 			// Get SVG dimensions using multiple methods for accuracy
-			let svgWidth, svgHeight;
+			let svgWidth: number, svgHeight: number;
 			try {
-				// Try getBBox() first
-				const bbox = this.svgElement.getBBox();
-				svgWidth = bbox.width;
-				svgHeight = bbox.height;
-				
-				// Use clientWidth/clientHeight if getBBox() returns too small values
-				if (svgWidth < 100 || svgHeight < 100) {
-					svgWidth = this.svgElement.clientWidth || svgWidth;
-					svgHeight = this.svgElement.clientHeight || svgHeight;
-				}
-			} catch (e) {
-				// Fallback to clientWidth/clientHeight if getBBox() fails
+				// Try clientWidth/clientHeight first
 				svgWidth = this.svgElement.clientWidth || 800;
 				svgHeight = this.svgElement.clientHeight || 600;
+				
+				// Use clientWidth/clientHeight if values are too small
+				if (svgWidth < 100 || svgHeight < 100) {
+					svgWidth = this.svgElement.clientWidth || 800;
+					svgHeight = this.svgElement.clientHeight || 600;
+				}
+			} catch {
+				// Fallback to default values if clientWidth/clientHeight fail
+				svgWidth = 800;
+				svgHeight = 600;
 			}
 			
 			// Ensure minimum dimensions
@@ -396,8 +403,9 @@ class MermaidZoomModal extends Modal {
 			
 			// Calculate optimal zoom level with more padding
 			const padding = 0.9; // 10% padding
-			const widthRatio = containerRect.width / svgWidth * padding;
-			const heightRatio = containerRect.height / svgHeight * padding;
+			// Calculate based on twice the SVG size to ensure enough space
+			const widthRatio = containerRect.width / (svgWidth * 2) * padding;
+			const heightRatio = containerRect.height / (svgHeight * 2) * padding;
 			this.zoomLevel = Math.min(widthRatio, heightRatio);
 			
 			// Since we're using flexbox to center the SVG, we don't need to calculate translate values
