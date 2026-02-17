@@ -7,7 +7,7 @@ A plugin for Obsidian that enhances Mermaid diagrams with zoom and pan functiona
 ## Features
 
 - **Automatic Detection**: Automatically identifies Mermaid diagrams in your notes, including Gantt charts, flowcharts, and more.
-- **Zoom Button**: Adds a "放大查看" (Zoom View) button to the top-right corner of each Mermaid diagram.
+- **Zoom Button**: Adds a zoom icon button to the top-left corner of each Mermaid diagram.
 - **Full-Screen Modal**: Clicking the button opens the diagram in a full-screen modal window.
 - **Interactive Controls**: Supports:
   - Mouse wheel zoom
@@ -32,7 +32,7 @@ A plugin for Obsidian that enhances Mermaid diagrams with zoom and pan functiona
 ## Usage
 
 1. Create or open a note with Mermaid diagrams
-2. In reading mode or live preview, you'll see a "放大查看" button in the top-right corner of each diagram
+2. In reading mode or live preview, you'll see a zoom icon button in the top-left corner of each diagram
 3. Click the button to open the diagram in full-screen mode
 4. Use the mouse wheel to zoom in and out
 5. Click and drag to pan the diagram
