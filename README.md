@@ -2,6 +2,8 @@
 
 A plugin for Obsidian that enhances Mermaid diagrams with zoom and pan functionality, allowing full-screen viewing of SVG content.
 
+[中文版本 (Chinese Version)](README.zh-CN.md)
+
 ## Features
 
 - **Automatic Detection**: Automatically identifies Mermaid diagrams in your notes, including Gantt charts, flowcharts, and more.
@@ -20,18 +22,9 @@ A plugin for Obsidian that enhances Mermaid diagrams with zoom and pan functiona
 
 ## Installation
 
-### From Community Plugins
-
-1. Open Obsidian settings
-2. Go to "Community Plugins"
-3. Click "Browse"
-4. Search for "Mermaid Zoom Viewer"
-5. Click "Install"
-6. Click "Enable"
-
 ### Manual Installation
 
-1. Download the latest release from the [GitHub repository](https://github.com/yourusername/mermaid-zoom-viewer/releases)
+1. Download the latest release from the [GitHub repository](https://github.com/HP-Patience/Mermaid-Zoom-Viewer/releases)
 2. Extract the zip file
 3. Copy the extracted folder to your vault's `.obsidian/plugins/` directory
 4. Enable the plugin in Obsidian settings
@@ -51,11 +44,12 @@ A plugin for Obsidian that enhances Mermaid diagrams with zoom and pan functiona
 The plugin includes a settings tab where you can configure:
 
 - **Always show zoom button**: Show the zoom button on all Mermaid diagrams
-- **Show zoom button on overflow**: Only show the zoom button when the diagram width overflows
 - **Default zoom level**: Initial zoom level when opening diagrams
 - **Minimum zoom level**: Minimum allowed zoom level
 - **Maximum zoom level**: Maximum allowed zoom level
 - **Enable PNG export**: Allow exporting diagrams as PNG images
+- **SVG container width**: Width percentage of the SVG container in the modal
+- **SVG container height**: Height percentage of the SVG container in the modal
 
 ## Compatibility
 
@@ -95,7 +89,7 @@ This plugin is licensed under the 0-BSD License.
 
 ## Support
 
-If you have any issues or feature requests, please open an issue on the [GitHub repository](https://github.com/yourusername/mermaid-zoom-viewer/issues).
+If you have any issues or feature requests, please open an issue on the [GitHub repository](https://github.com/HP-Patience/Mermaid-Zoom-Viewer/issues).
 
 ---
 
